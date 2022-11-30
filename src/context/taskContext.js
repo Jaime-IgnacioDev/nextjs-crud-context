@@ -1,27 +1,38 @@
 import { createContext, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 
-export const TaskContext = createContext();
-
-export const useTasks = () => useContext(TaskContext);
+const TaskContext = createContext();
 
 export const TasksProvider = ({ children }) => {
+  const [tasks, setTasks] = useState([]);
 
-    const [tasks, setTasks] = useState([
-        {id: "1", tittle: "firts task", 
-        description: "some task"}]);
+  const createTask = (title, description) =>
+    setTasks([...tasks, { id: uuid(), title, description }]);
 
-    const createTask = (tittle, description) => {
-        setTasks([...tasks, {
-            tittle, 
-            description, 
-            id: uuid() }]);
-    }
+  const updateTask = (id, updatedTask) =>
+    setTasks([
+      ...tasks.map((task) =>
+        task.id === id ? { ...task, ...updatedTask } : task
+      ),
+    ]);
 
+  const deleteTask = (id) =>
+    setTasks([...tasks.filter((task) => task.id !== id)]);
 
-    return (
-        <TaskContext.Provider value={{tasks, createTask}}>
-            { children }
-        </TaskContext.Provider>
-    );
-}
+  return (
+    <TaskContext.Provider
+      value={{
+        tasks,
+        createTask,
+        updateTask,
+        deleteTask,
+      }}
+    >
+      {children}
+    </TaskContext.Provider>
+  );
+};
+
+export const useTasks = () => {
+  return useContext(TaskContext);
+};
